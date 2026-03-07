@@ -86,17 +86,6 @@ src/
 
 <br>
 
-## 🚢 Deployment
-
-Build and deploy to the production server:
-
-```bash
-chmod +x deploy.sh
-./deploy.sh
-```
-
-<br>
-
 ## 💖 Support
 
 If you find DreamSVG useful, consider supporting the project:
