@@ -1,7 +1,12 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { xml } from '@codemirror/lang-xml'
 import './App.css'
+
+const STORAGE_KEYS = {
+  activeTemplate: 'dreamsvg.activeTemplate',
+  svgCode: 'dreamsvg.svgCode',
+}
 
 const templates = {
   spark: `<svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -70,10 +75,24 @@ function getSvgMeta(markup) {
 }
 
 function App() {
-  const [svgCode, setSvgCode] = useState(templates.spark)
-  const [activeTemplate, setActiveTemplate] = useState('spark')
+  const [svgCode, setSvgCode] = useState(() => {
+    const savedCode = localStorage.getItem(STORAGE_KEYS.svgCode)
+    return savedCode || templates.spark
+  })
+  const [activeTemplate, setActiveTemplate] = useState(() => {
+    const savedTemplate = localStorage.getItem(STORAGE_KEYS.activeTemplate)
+    return templates[savedTemplate] ? savedTemplate : 'spark'
+  })
 
   const svgMeta = useMemo(() => getSvgMeta(svgCode), [svgCode])
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.svgCode, svgCode)
+  }, [svgCode])
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.activeTemplate, activeTemplate)
+  }, [activeTemplate])
 
   const handleTemplateChange = (templateKey) => {
     setActiveTemplate(templateKey)
