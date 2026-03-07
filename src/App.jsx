@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import formatXml from 'xml-formatter'
+import AiPanel from './components/AiPanel'
 import SvgCodeEditor from './components/SvgCodeEditor'
+import { DEFAULT_MODEL, generateSvgFromPrompt } from './services/svgAi'
 import './App.css'
 
 const STORAGE_KEYS = {
@@ -122,6 +124,9 @@ function App() {
     const savedMode = localStorage.getItem(STORAGE_KEYS.editorMode)
     return savedMode === 'ai' ? 'ai' : 'code'
   })
+  const [aiBusy, setAiBusy] = useState(false)
+  const [aiError, setAiError] = useState('')
+  const [aiPrompt, setAiPrompt] = useState('minimal outline camera icon')
   const [formatError, setFormatError] = useState('')
 
   const svgMeta = useMemo(() => getSvgMeta(svgCode), [svgCode])
@@ -146,6 +151,29 @@ function App() {
       setFormatError('')
     } catch {
       setFormatError('Не удалось отформатировать SVG. Сначала исправь синтаксис.')
+    }
+  }
+
+  const handleGenerateWithAi = async () => {
+    setAiBusy(true)
+    setAiError('')
+
+    try {
+      const nextSvg = await generateSvgFromPrompt(aiPrompt, svgCode)
+      setSvgCode(formatXml(nextSvg, {
+        collapseContent: true,
+        indentation: '  ',
+        lineSeparator: '\n',
+      }))
+      setEditorMode('code')
+    } catch (error) {
+      setAiError(
+        error instanceof Error
+          ? error.message
+          : 'AI request failed',
+      )
+    } finally {
+      setAiBusy(false)
     }
   }
 
@@ -209,28 +237,14 @@ function App() {
               error={formatError}
             />
           ) : (
-            <div className="editor-frame ai-panel">
-              <div className="ai-placeholder">
-                <div className="ai-placeholder-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M12 3L13.8 8.2L19 10L13.8 11.8L12 17L10.2 11.8L5 10L10.2 8.2L12 3Z"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <span className="editor-label">AI mode</span>
-                  <p className="ai-placeholder-title">Логика генерации пока не подключена</p>
-                  <p className="ai-placeholder-text">
-                    Здесь можно будет добавить твой собственный AI flow, промпты и
-                    генерацию SVG без изменения структуры интерфейса.
-                  </p>
-                </div>
-              </div>
-            </div>
+            <AiPanel
+              busy={aiBusy}
+              error={aiError}
+              model={DEFAULT_MODEL}
+              onGenerate={handleGenerateWithAi}
+              prompt={aiPrompt}
+              setPrompt={setAiPrompt}
+            />
           )}
         </article>
 

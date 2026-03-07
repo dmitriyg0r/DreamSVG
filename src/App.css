@@ -170,44 +170,78 @@
 
 .ai-panel {
   display: grid;
-  align-items: center;
+  align-content: start;
+  gap: 14px;
   min-height: 0;
   height: 100%;
 }
 
-.ai-placeholder {
-  display: grid;
-  gap: 16px;
-  max-width: 420px;
+.ai-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.ai-placeholder-icon {
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  border: 1px solid #dbe3ee;
-  border-radius: 18px;
-  color: #475569;
-  background: #fcfdff;
-}
-
-.ai-placeholder-icon svg {
-  width: 24px;
-  height: 24px;
+.ai-model-badge {
+  padding: 7px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .ai-placeholder-title {
-  margin: 0 0 8px;
+  margin: 4px 0 0;
   font-size: 1.05rem;
   font-weight: 600;
   color: #0f172a;
 }
 
-.ai-placeholder-text {
-  margin: 0;
+.ai-prompt-input {
+  width: 100%;
+  min-height: 180px;
+  border: 1px solid #eef2f7;
+  border-radius: 16px;
+  padding: 14px 16px;
+  resize: none;
+  background: #fcfdff;
+  color: #0f172a;
+  font: inherit;
+}
+
+.ai-suggestion-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-suggestion-chip {
+  border: 1px solid #dbe3ee;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: #ffffff;
   color: #64748b;
-  line-height: 1.6;
+  font-size: 0.88rem;
+}
+
+.ai-generate-button {
+  width: 100%;
+  border: 1px solid #0f172a;
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: #0f172a;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.ai-generate-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
 }
 
 .code-editor-shell {
@@ -379,6 +413,20 @@
   .panel-editor,
   .panel-preview {
     overflow: hidden;
+  }
+
+  .workspace-header {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-header-spacer {
+    display: none;
+  }
+
+  .workspace-header h1,
+  .workspace-meta {
+    justify-self: start;
+    text-align: left;
   }
 
   .preview-canvas {
