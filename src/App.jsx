@@ -1,14 +1,21 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import formatXml from 'xml-formatter'
 import AiPanel from './components/AiPanel'
 import AppLogo from './components/AppLogo'
 import SvgCodeEditor from './components/SvgCodeEditor'
+import { useDebounce } from './hooks/useDebounce'
+import { useSvgHistory } from './hooks/useSvgHistory'
 import { DEFAULT_MODEL, generateSvgFromPrompt } from './services/svgAi'
+import { downloadFile } from './utils/download'
+import { buildJsxComponent } from './utils/jsxConverter'
+import { sanitizeSvg } from './utils/sanitize'
+import { getSvgMeta } from './utils/svgMeta'
 import './App.css'
 
 const STORAGE_KEYS = {
   editorMode: 'dreamsvg.editorMode',
   svgCode: 'dreamsvg.svgCode',
+  theme: 'dreamsvg.theme',
 }
 
 const INITIAL_SVG = `<svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -16,105 +23,6 @@ const INITIAL_SVG = `<svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3
   <path d="M64 28L74.5 53.5L100 64L74.5 74.5L64 100L53.5 74.5L28 64L53.5 53.5L64 28Z" fill="#F97316"/>
   <circle cx="64" cy="64" r="14" fill="#FDE68A"/>
 </svg>`
-
-const JSX_ATTRIBUTE_MAP = {
-  'clip-path': 'clipPath',
-  'clip-rule': 'clipRule',
-  'fill-opacity': 'fillOpacity',
-  'fill-rule': 'fillRule',
-  'mask-type': 'maskType',
-  'stop-color': 'stopColor',
-  'stop-opacity': 'stopOpacity',
-  'stroke-dasharray': 'strokeDasharray',
-  'stroke-dashoffset': 'strokeDashoffset',
-  'stroke-linecap': 'strokeLinecap',
-  'stroke-linejoin': 'strokeLinejoin',
-  'stroke-miterlimit': 'strokeMiterlimit',
-  'stroke-opacity': 'strokeOpacity',
-  'stroke-width': 'strokeWidth',
-  'text-anchor': 'textAnchor',
-  'xlink:href': 'xlinkHref',
-  xmlnsXlink: 'xmlnsXlink',
-}
-
-function getSvgMeta(markup) {
-  try {
-    const parser = new DOMParser()
-    const document = parser.parseFromString(markup, 'image/svg+xml')
-    const parserError = document.querySelector('parsererror')
-
-    if (parserError) {
-      return {
-        isValid: false,
-        error: 'SVG содержит синтаксическую ошибку. Проверь теги и атрибуты.',
-      }
-    }
-
-    const svg = document.documentElement
-
-    if (svg?.tagName !== 'svg') {
-      return {
-        isValid: false,
-        error: 'Корневой элемент должен быть <svg>.',
-      }
-    }
-
-    const viewBox = svg.getAttribute('viewBox') || 'Не указан'
-    const width = svg.getAttribute('width') || 'auto'
-    const height = svg.getAttribute('height') || 'auto'
-    const shapes = svg.querySelectorAll('path, circle, rect, ellipse, polygon, polyline, line, g').length
-
-    return {
-      isValid: true,
-      error: '',
-      viewBox,
-      width,
-      height,
-      shapes,
-    }
-  } catch {
-    return {
-      isValid: false,
-      error: 'Не удалось обработать SVG.',
-    }
-  }
-}
-
-function toJsxAttributes(markup) {
-  return markup
-    .replace(/\bclass=/g, 'className=')
-    .replace(/\bfor=/g, 'htmlFor=')
-    .replace(/\b([a-z]+:[a-z-]+)=/gi, (match, attribute) => {
-      const jsxName = JSX_ATTRIBUTE_MAP[attribute] || attribute.replace(/:([a-z])/g, (_, char) => char.toUpperCase())
-      return `${jsxName}=`
-    })
-    .replace(/\b([a-z]+(?:-[a-z]+)+)=/gi, (match, attribute) => {
-      const jsxName = JSX_ATTRIBUTE_MAP[attribute] || attribute.replace(/-([a-z])/g, (_, char) => char.toUpperCase())
-      return `${jsxName}=`
-    })
-}
-
-function buildJsxComponent(svgMarkup) {
-  const jsxSvg = toJsxAttributes(svgMarkup)
-  return `export default function SvgIcon(props) {
-  return (
-    ${jsxSvg.replace('<svg', '<svg {...props}')}
-  )
-}
-`
-}
-
-function downloadFile(filename, content, type) {
-  const blob = new Blob([content], { type })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-
-  link.href = url
-  link.download = filename
-  link.click()
-
-  URL.revokeObjectURL(url)
-}
 
 function App() {
   const [svgCode, setSvgCode] = useState(() => {
@@ -129,8 +37,18 @@ function App() {
   const [aiError, setAiError] = useState('')
   const [aiPrompt, setAiPrompt] = useState('minimal outline camera icon')
   const [formatError, setFormatError] = useState('')
+  const [copied, setCopied] = useState(false)
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.theme)
+    if (saved) return saved
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  })
 
-  const svgMeta = useMemo(() => getSvgMeta(svgCode), [svgCode])
+  const { canUndo, pushSnapshot, undo } = useSvgHistory()
+
+  const debouncedCode = useDebounce(svgCode, 300)
+  const svgMeta = useMemo(() => getSvgMeta(debouncedCode), [debouncedCode])
+  const safeSvg = useMemo(() => sanitizeSvg(debouncedCode), [debouncedCode])
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.svgCode, svgCode)
@@ -139,6 +57,13 @@ function App() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.editorMode, editorMode)
   }, [editorMode])
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem(STORAGE_KEYS.theme, theme)
+  }, [theme])
+
+  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
 
   const handleFormatSvg = () => {
     try {
@@ -156,6 +81,7 @@ function App() {
   }
 
   const handleGenerateWithAi = async () => {
+    pushSnapshot(svgCode)
     setAiBusy(true)
     setAiError('')
 
@@ -179,6 +105,29 @@ function App() {
       )
     } finally {
       setAiBusy(false)
+    }
+  }
+
+  const handleUndo = useCallback(() => {
+    const previous = undo()
+    if (previous) setSvgCode(previous)
+  }, [undo])
+
+  const handleCopySvg = async () => {
+    try {
+      await navigator.clipboard.writeText(svgCode)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      // Fallback for older browsers
+      const textarea = document.createElement('textarea')
+      textarea.value = svgCode
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
     }
   }
 
@@ -241,6 +190,36 @@ function App() {
             </div>
 
             <div className="editor-actions">
+              {canUndo && (
+                <button
+                  type="button"
+                  className="undo-button"
+                  onClick={handleUndo}
+                  aria-label="Undo last AI generation"
+                >
+                  <svg
+                    className="button-icon"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M4.5 8.5L2 6L4.5 3.5"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M2.5 6H12C14.7614 6 17 8.23858 17 11C17 13.7614 14.7614 16 12 16H6"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
+              )}
               <div className="mode-switch" aria-label="Editor mode">
                 <button
                   type="button"
@@ -285,13 +264,30 @@ function App() {
               <span className="panel-kicker">Предпросмотр</span>
               <h2>Живой рендер</h2>
             </div>
+            <button
+              type="button"
+              className="theme-toggle"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+            >
+              {theme === 'dark' ? (
+                <svg className="theme-toggle-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" />
+                </svg>
+              ) : (
+                <svg className="theme-toggle-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg>
+              )}
+              <span className="theme-toggle-track" />
+            </button>
           </div>
 
           <div className="preview-stage">
             {svgMeta.isValid ? (
               <div
                 className="preview-canvas"
-                dangerouslySetInnerHTML={{ __html: svgCode }}
+                dangerouslySetInnerHTML={{ __html: safeSvg }}
               />
             ) : (
               <div className="preview-error">
@@ -302,6 +298,14 @@ function App() {
           </div>
 
           <div className="inspector">
+            <button
+              type="button"
+              className={`export-button export-button-copy${copied ? ' export-button-copied' : ''}`}
+              onClick={handleCopySvg}
+              disabled={!svgMeta.isValid}
+            >
+              {copied ? '✓ Copied!' : 'Copy SVG'}
+            </button>
             <button
               type="button"
               className="export-button"
