@@ -22,8 +22,60 @@
   margin-bottom: -2px;
 }
 
-.workspace-header-spacer {
-  min-height: 1px;
+.workspace-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-logo {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+}
+
+.workspace-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: center;
+}
+
+.workspace-github {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #475569;
+  text-decoration: none;
+}
+
+.workspace-github svg {
+  width: 18px;
+  height: 18px;
+}
+
+.workspace-donate {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.workspace-donate svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
 }
 
 .workspace-header h1 {
@@ -33,7 +85,6 @@
   font-weight: 600;
   letter-spacing: -0.02em;
   color: #0f172a;
-  text-align: center;
 }
 
 .panel-kicker,
@@ -387,8 +438,8 @@
   }
 
   .workspace-header {
+    grid-template-columns: 1fr;
     align-items: flex-start;
-    flex-direction: column;
   }
 
   .workspace-meta {
@@ -400,18 +451,10 @@
     overflow: hidden;
   }
 
-  .workspace-header {
-    grid-template-columns: 1fr;
-  }
-
-  .workspace-header-spacer {
-    display: none;
-  }
-
-  .workspace-header h1,
+  .workspace-brand,
+  .workspace-links,
   .workspace-meta {
     justify-self: start;
-    text-align: left;
   }
 
   .preview-canvas {
