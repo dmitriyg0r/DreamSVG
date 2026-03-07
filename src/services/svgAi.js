@@ -4,6 +4,39 @@ const POLZA_API_BASE_URL =
 
 const DEFAULT_MODEL = import.meta.env.VITE_POLZA_AI_MODEL || 'openai/gpt-4o'
 
+const SVG_SYSTEM_PROMPT = `You generate clean SVG icons for a code-based icon editor.
+
+Rules:
+- Return only raw SVG markup.
+- Do not use markdown fences.
+- Do not explain anything.
+- Output must be valid XML.
+- Use exactly one <svg> root element.
+- Always include viewBox="0 0 128 128".
+- Keep the icon visually centered in the canvas.
+- Prefer simple geometric construction.
+- Avoid unnecessary groups and excessive node count.
+- Do not use raster images, foreignObject, or embedded base64 content.
+- Do not use CSS stylesheets or <style> tags.
+- Prefer presentation attributes directly on elements.
+- Keep the icon suitable for small-size rendering.
+- Make the design clear at 24x24.
+- If possible, keep the element count low.
+- Preserve symmetry when it helps readability.
+- Use rounded joins/caps when appropriate for icon quality.
+
+Output requirements:
+- The result must start with <svg and end with </svg>.
+- The SVG should be directly renderable in a browser.
+- No text before or after the SVG.
+
+Behavior:
+- Decide from the user request whether to create a new icon or edit the current SVG.
+- If the user clearly asks for a new icon, create a new SVG.
+- If the user asks to refine, simplify, recolor, resize, or adjust details, modify the current SVG instead.
+- If the intent is ambiguous, prefer editing the current SVG while preserving the overall concept.
+- Keep edits minimal unless the user explicitly asks for a redesign.`
+
 function getApiKey() {
   const apiKey = import.meta.env.VITE_POLZA_AI_API_KEY
 
@@ -30,7 +63,22 @@ function sanitizeSvgResponse(content) {
   return cleaned.slice(startIndex, endIndex + 6)
 }
 
-export async function generateSvgFromPrompt(prompt, currentSvg = '') {
+function buildSvgUserPrompt(prompt, currentSvg) {
+  return `User request:
+${prompt}
+
+Current SVG:
+${currentSvg || 'No current SVG provided.'}
+
+Task:
+- Infer whether the user wants a new icon or a modification of the current icon.
+- Return only the final SVG.`
+}
+
+export async function generateSvgFromPrompt({
+  prompt,
+  currentSvg = '',
+}) {
   if (!prompt.trim()) {
     throw new Error('Prompt is empty')
   }
@@ -47,14 +95,11 @@ export async function generateSvgFromPrompt(prompt, currentSvg = '') {
       messages: [
         {
           role: 'system',
-          content:
-            'You generate clean SVG icons. Return only raw SVG markup, no markdown and no explanation. Use a single <svg> root, keep viewBox="0 0 128 128", prefer simple geometric paths, and make the result valid XML suitable for direct rendering.',
+          content: SVG_SYSTEM_PROMPT,
         },
         {
           role: 'user',
-          content: currentSvg
-            ? `Update this SVG icon according to the prompt.\n\nPrompt: ${prompt}\n\nCurrent SVG:\n${currentSvg}`
-            : `Create a new SVG icon.\n\nPrompt: ${prompt}`,
+          content: buildSvgUserPrompt(prompt, currentSvg),
         },
       ],
     }),

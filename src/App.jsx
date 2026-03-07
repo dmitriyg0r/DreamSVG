@@ -159,7 +159,10 @@ function App() {
     setAiError('')
 
     try {
-      const nextSvg = await generateSvgFromPrompt(aiPrompt, svgCode)
+      const nextSvg = await generateSvgFromPrompt({
+        prompt: aiPrompt,
+        currentSvg: svgCode,
+      })
       setSvgCode(formatXml(nextSvg, {
         collapseContent: true,
         indentation: '  ',

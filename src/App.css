@@ -213,21 +213,6 @@
   font: inherit;
 }
 
-.ai-suggestion-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.ai-suggestion-chip {
-  border: 1px solid #dbe3ee;
-  border-radius: 999px;
-  padding: 8px 12px;
-  background: #ffffff;
-  color: #64748b;
-  font-size: 0.88rem;
-}
-
 .ai-generate-button {
   width: 100%;
   border: 1px solid #0f172a;
