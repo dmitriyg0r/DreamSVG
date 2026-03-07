@@ -116,15 +116,40 @@
   color: #94a3b8;
 }
 
-.code-editor {
-  width: 100%;
+.code-editor-shell {
+  border: 1px solid #eef2f7;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fcfdff;
+}
+
+.code-editor-shell .cm-editor {
   min-height: 560px;
-  border: 0;
-  padding: 0;
-  resize: vertical;
-  background: transparent;
-  color: #0f172a;
-  font: 500 0.94rem/1.7 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  background: #fcfdff;
+}
+
+.code-editor-shell .cm-scroller {
+  font-family: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  line-height: 1.7;
+}
+
+.code-editor-shell .cm-gutters {
+  border-right: 1px solid #eef2f7;
+  background: #f8fafc;
+  color: #94a3b8;
+}
+
+.code-editor-shell .cm-activeLine,
+.code-editor-shell .cm-activeLineGutter {
+  background: rgba(226, 232, 240, 0.45);
+}
+
+.code-editor-shell .cm-content,
+.code-editor-shell .cm-line {
+  padding-top: 0;
+}
+
+.code-editor-shell .cm-focused {
   outline: none;
 }
 
@@ -221,7 +246,7 @@
     justify-content: flex-start;
   }
 
-  .code-editor {
+  .code-editor-shell .cm-editor {
     min-height: 420px;
   }
 }

@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react'
+import CodeMirror from '@uiw/react-codemirror'
+import { xml } from '@codemirror/lang-xml'
 import './App.css'
 
 const templates = {
@@ -116,11 +118,20 @@ function App() {
 
           <label className="editor-frame">
             <span className="editor-label">Вставь или измени SVG-разметку</span>
-            <textarea
+            <CodeMirror
               value={svgCode}
-              onChange={(event) => setSvgCode(event.target.value)}
-              spellCheck="false"
-              className="code-editor"
+              onChange={(value) => setSvgCode(value)}
+              extensions={[xml()]}
+              basicSetup={{
+                autocompletion: true,
+                bracketMatching: true,
+                closeBrackets: true,
+                foldGutter: false,
+                highlightActiveLine: true,
+                highlightSelectionMatches: true,
+                lineNumbers: true,
+              }}
+              className="code-editor-shell"
             />
           </label>
         </article>
