@@ -17,7 +17,7 @@ const editorTheme = EditorView.theme({
     outline: 'none',
   },
   '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
-    backgroundColor: 'rgba(148, 163, 184, 0.18)',
+    backgroundColor: 'rgba(59, 130, 246, 0.3)',
   },
 })
 

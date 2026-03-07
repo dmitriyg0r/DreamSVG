@@ -168,6 +168,7 @@ function App() {
         indentation: '  ',
         lineSeparator: '\n',
       }))
+      setAiPrompt('')
       setEditorMode('code')
     } catch (error) {
       setAiError(
