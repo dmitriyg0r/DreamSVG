@@ -1,35 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
-import CodeMirror from '@uiw/react-codemirror'
-import { xml } from '@codemirror/lang-xml'
+import formatXml from 'xml-formatter'
+import SvgCodeEditor from './components/SvgCodeEditor'
 import './App.css'
 
 const STORAGE_KEYS = {
-  activeTemplate: 'dreamsvg.activeTemplate',
+  editorMode: 'dreamsvg.editorMode',
   svgCode: 'dreamsvg.svgCode',
 }
 
-const templates = {
-  spark: `<svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+const INITIAL_SVG = `<svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="18" y="18" width="92" height="92" rx="28" fill="#111827"/>
   <path d="M64 28L74.5 53.5L100 64L74.5 74.5L64 100L53.5 74.5L28 64L53.5 53.5L64 28Z" fill="#F97316"/>
   <circle cx="64" cy="64" r="14" fill="#FDE68A"/>
-</svg>`,
-  grid: `<svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="128" height="128" rx="30" fill="#0F172A"/>
-  <rect x="24" y="24" width="32" height="32" rx="10" fill="#22C55E"/>
-  <rect x="72" y="24" width="32" height="32" rx="10" fill="#38BDF8"/>
-  <rect x="24" y="72" width="32" height="32" rx="10" fill="#F59E0B"/>
-  <path d="M72 72H104V104H72L88 88L72 72Z" fill="#F43F5E"/>
-</svg>`,
-  orbit: `<svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="128" height="128" rx="30" fill="#172554"/>
-  <circle cx="64" cy="64" r="12" fill="#E0E7FF"/>
-  <ellipse cx="64" cy="64" rx="42" ry="18" stroke="#A78BFA" stroke-width="8"/>
-  <ellipse cx="64" cy="64" rx="18" ry="42" stroke="#60A5FA" stroke-width="8"/>
-  <circle cx="28" cy="64" r="7" fill="#F9A8D4"/>
-  <circle cx="92" cy="39" r="7" fill="#FDE68A"/>
-</svg>`,
-}
+</svg>`
 
 function getSvgMeta(markup) {
   try {
@@ -77,12 +60,13 @@ function getSvgMeta(markup) {
 function App() {
   const [svgCode, setSvgCode] = useState(() => {
     const savedCode = localStorage.getItem(STORAGE_KEYS.svgCode)
-    return savedCode || templates.spark
+    return savedCode || INITIAL_SVG
   })
-  const [activeTemplate, setActiveTemplate] = useState(() => {
-    const savedTemplate = localStorage.getItem(STORAGE_KEYS.activeTemplate)
-    return templates[savedTemplate] ? savedTemplate : 'spark'
+  const [editorMode, setEditorMode] = useState(() => {
+    const savedMode = localStorage.getItem(STORAGE_KEYS.editorMode)
+    return savedMode === 'ai' ? 'ai' : 'code'
   })
+  const [formatError, setFormatError] = useState('')
 
   const svgMeta = useMemo(() => getSvgMeta(svgCode), [svgCode])
 
@@ -91,12 +75,22 @@ function App() {
   }, [svgCode])
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.activeTemplate, activeTemplate)
-  }, [activeTemplate])
+    localStorage.setItem(STORAGE_KEYS.editorMode, editorMode)
+  }, [editorMode])
 
-  const handleTemplateChange = (templateKey) => {
-    setActiveTemplate(templateKey)
-    setSvgCode(templates[templateKey])
+  const handleFormatSvg = () => {
+    try {
+      const formattedSvg = formatXml(svgCode, {
+        collapseContent: true,
+        indentation: '  ',
+        lineSeparator: '\n',
+      })
+
+      setSvgCode(formattedSvg)
+      setFormatError('')
+    } catch {
+      setFormatError('Не удалось отформатировать SVG. Сначала исправь синтаксис.')
+    }
   }
 
   return (
@@ -118,41 +112,60 @@ function App() {
           <div className="panel-header">
             <div>
               <span className="panel-kicker">Редактор</span>
-              <h2>SVG код</h2>
+              <h2>{editorMode === 'code' ? 'SVG код' : 'AI prompt'}</h2>
             </div>
 
-            <div className="template-switcher" aria-label="SVG templates">
-              {Object.keys(templates).map((templateKey) => (
+            <div className="editor-actions">
+              <div className="mode-switch" aria-label="Editor mode">
                 <button
-                  key={templateKey}
                   type="button"
-                  className={templateKey === activeTemplate ? 'active' : ''}
-                  onClick={() => handleTemplateChange(templateKey)}
+                  className={editorMode === 'code' ? 'active' : ''}
+                  onClick={() => setEditorMode('code')}
                 >
-                  {templateKey}
+                  Code
                 </button>
-              ))}
+                <button
+                  type="button"
+                  className={editorMode === 'ai' ? 'active' : ''}
+                  onClick={() => setEditorMode('ai')}
+                >
+                  AI
+                </button>
+              </div>
             </div>
           </div>
 
-          <label className="editor-frame">
-            <span className="editor-label">Вставь или измени SVG-разметку</span>
-            <CodeMirror
+          {editorMode === 'code' ? (
+            <SvgCodeEditor
               value={svgCode}
-              onChange={(value) => setSvgCode(value)}
-              extensions={[xml()]}
-              basicSetup={{
-                autocompletion: true,
-                bracketMatching: true,
-                closeBrackets: true,
-                foldGutter: false,
-                highlightActiveLine: true,
-                highlightSelectionMatches: true,
-                lineNumbers: true,
-              }}
-              className="code-editor-shell"
+              onChange={setSvgCode}
+              onFormat={handleFormatSvg}
+              error={formatError}
             />
-          </label>
+          ) : (
+            <div className="editor-frame ai-panel">
+              <div className="ai-placeholder">
+                <div className="ai-placeholder-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M12 3L13.8 8.2L19 10L13.8 11.8L12 17L10.2 11.8L5 10L10.2 8.2L12 3Z"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <span className="editor-label">AI mode</span>
+                  <p className="ai-placeholder-title">Логика генерации пока не подключена</p>
+                  <p className="ai-placeholder-text">
+                    Здесь можно будет добавить твой собственный AI flow, промпты и
+                    генерацию SVG без изменения структуры интерфейса.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </article>
 
         <article className="panel panel-preview">
