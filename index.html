@@ -1,13 +1,75 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/dreamsvg-logo.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DreamSVG editor</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Primary Meta -->
+  <title>DreamSVG — AI-powered SVG Icon Editor</title>
+  <meta name="description"
+    content="Создавайте, редактируйте и экспортируйте SVG-иконки с помощью AI. Живой превью, конвертация в JSX, тёмная тема. Бесплатный онлайн-инструмент." />
+  <meta name="keywords"
+    content="SVG editor, SVG icons, AI icon generator, React SVG, JSX, icon editor online, free SVG tool, DreamSVG" />
+  <meta name="author" content="Dmitriy Gordienko" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/dreamsvg-logo.svg" />
+  <link rel="apple-touch-icon" href="/og-preview.png" />
+
+  <!-- Open Graph (Facebook, Telegram, VK, Discord) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://dreamsvg.ru/" />
+  <meta property="og:title" content="DreamSVG — AI-powered SVG Icon Editor" />
+  <meta property="og:description"
+    content="Создавайте и редактируйте SVG-иконки с помощью AI. Живой превью, экспорт в SVG / JSX, тёмная тема." />
+  <meta property="og:image" content="https://dreamsvg.ru/og-preview.png" />
+  <meta property="og:image:width" content="1024" />
+  <meta property="og:image:height" content="1024" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:site_name" content="DreamSVG" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="DreamSVG — AI-powered SVG Icon Editor" />
+  <meta name="twitter:description"
+    content="Создавайте и редактируйте SVG-иконки с помощью AI. Живой превью, экспорт в SVG / JSX." />
+  <meta name="twitter:image" content="https://dreamsvg.ru/og-preview.png" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://dreamsvg.ru/" />
+
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#0f172a" />
+
+  <!-- Structured Data (Schema.org) -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "DreamSVG",
+      "url": "https://dreamsvg.ru",
+      "description": "AI-powered SVG icon editor with live preview, AI generation, and JSX export",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Dmitriy Gordienko",
+        "url": "https://github.com/dmitriyg0r"
+      }
+    }
+    </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>
