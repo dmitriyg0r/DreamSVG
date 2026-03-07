@@ -1,16 +1,39 @@
 import CodeMirror from '@uiw/react-codemirror'
 import { xml } from '@codemirror/lang-xml'
+import { indentWithTab } from '@codemirror/commands'
+import { keymap, EditorView } from '@codemirror/view'
 
-const editorExtensions = [xml()]
+const editorTheme = EditorView.theme({
+  '&': {
+    fontSize: '0.94rem',
+  },
+  '.cm-content': {
+    caretColor: '#0f172a',
+  },
+  '.cm-cursor, .cm-dropCursor': {
+    borderLeft: '2px solid #0f172a',
+  },
+  '&.cm-focused': {
+    outline: 'none',
+  },
+  '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
+    backgroundColor: 'rgba(148, 163, 184, 0.18)',
+  },
+})
+
+const editorExtensions = [xml(), EditorView.lineWrapping, keymap.of([indentWithTab]), editorTheme]
 
 const editorSetup = {
   autocompletion: true,
   bracketMatching: true,
   closeBrackets: true,
+  defaultKeymap: true,
   foldGutter: false,
   highlightActiveLine: true,
   highlightSelectionMatches: true,
+  indentOnInput: true,
   lineNumbers: true,
+  lintKeymap: true,
 }
 
 function SvgCodeEditor({ value, onChange, onFormat, error }) {
@@ -54,6 +77,7 @@ function SvgCodeEditor({ value, onChange, onFormat, error }) {
           onChange={onChange}
           extensions={editorExtensions}
           basicSetup={editorSetup}
+          className="svg-code-editor"
         />
       </div>
 

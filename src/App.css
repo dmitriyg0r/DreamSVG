@@ -207,10 +207,6 @@
   line-height: 1.7;
 }
 
-.code-editor-shell .cm-focused {
-  outline: none;
-}
-
 .code-editor-shell .cm-gutters {
   border-right: 1px solid #eef2f7;
   background: #f8fafc;
@@ -235,9 +231,21 @@
   caret-color: #0f172a;
 }
 
+.code-editor-shell .cm-selectionBackground {
+  background: rgba(148, 163, 184, 0.18) !important;
+}
+
 .code-editor-shell .cm-cursor,
 .code-editor-shell .cm-dropCursor {
   border-left: 2px solid #0f172a !important;
+}
+
+.code-editor-shell .cm-focused .cm-activeLine {
+  background: rgba(226, 232, 240, 0.55);
+}
+
+.code-editor-shell .cm-focused .cm-activeLineGutter {
+  background: rgba(226, 232, 240, 0.72);
 }
 
 .editor-feedback {
