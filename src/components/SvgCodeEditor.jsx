@@ -45,7 +45,7 @@ function SvgCodeEditor({ value, onChange, onFormat, error }) {
           type="button"
           className="format-button"
           onClick={onFormat}
-          aria-label="Format SVG"
+          aria-label="Отформатировать SVG"
         >
           <svg
             className="button-icon"

@@ -10,8 +10,8 @@ function AiPanel({
     <div className="editor-frame ai-panel">
       <div className="ai-panel-header">
         <div>
-          <span className="editor-label">AI prompt</span>
-          <p className="ai-placeholder-title">Generate or refine SVG with AI</p>
+          <span className="editor-label">AI запрос</span>
+          <p className="ai-placeholder-title">Сгенерируй или доработай SVG с помощью AI</p>
         </div>
         <span className="ai-model-badge">{model}</span>
       </div>
@@ -29,7 +29,7 @@ function AiPanel({
         onClick={onGenerate}
         disabled={busy || !prompt.trim()}
       >
-        {busy ? 'Generating…' : 'Generate SVG'}
+        {busy ? 'Генерирую…' : 'Сгенерировать SVG'}
       </button>
 
       {error ? <p className="editor-feedback">{error}</p> : null}
