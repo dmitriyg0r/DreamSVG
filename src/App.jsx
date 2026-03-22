@@ -44,7 +44,7 @@ function App() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   })
 
-  const { canUndo, pushSnapshot, undo } = useSvgHistory()
+  const { canUndo, canRedo, pushSnapshot, undo, redo } = useSvgHistory()
 
   const debouncedCode = useDebounce(svgCode, 300)
   const svgMeta = useMemo(() => getSvgMeta(debouncedCode), [debouncedCode])
@@ -109,9 +109,14 @@ function App() {
   }
 
   const handleUndo = useCallback(() => {
-    const previous = undo()
+    const previous = undo(svgCode)
     if (previous) setSvgCode(previous)
-  }, [undo])
+  }, [undo, svgCode])
+
+  const handleRedo = useCallback(() => {
+    const next = redo(svgCode)
+    if (next) setSvgCode(next)
+  }, [redo, svgCode])
 
   const handleCopySvg = async () => {
     try {
@@ -195,7 +200,8 @@ function App() {
                   type="button"
                   className="undo-button"
                   onClick={handleUndo}
-                  aria-label="Отменить последнюю AI-генерацию"
+                  aria-label="Отменить"
+                  title="Отменить (Ctrl+Z)"
                 >
                   <svg
                     className="button-icon"
@@ -213,6 +219,37 @@ function App() {
                     />
                     <path
                       d="M2.5 6H12C14.7614 6 17 8.23858 17 11C17 13.7614 14.7614 16 12 16H6"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
+              )}
+              {canRedo && (
+                <button
+                  type="button"
+                  className="undo-button"
+                  onClick={handleRedo}
+                  aria-label="Повторить"
+                  title="Повторить (Ctrl+Y)"
+                >
+                  <svg
+                    className="button-icon"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M15.5 8.5L18 6L15.5 3.5"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M17.5 6H8C5.23858 6 3 8.23858 3 11C3 13.7614 5.23858 16 8 16H14"
                       stroke="currentColor"
                       strokeWidth="1.6"
                       strokeLinecap="round"

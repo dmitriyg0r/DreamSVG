@@ -3,39 +3,64 @@ import { useCallback, useState } from 'react'
 const MAX_HISTORY = 50
 
 /**
- * Simple undo-history hook for SVG code.
+ * Undo/redo history hook for SVG code.
  *
- * Call `pushSnapshot(code)` before an AI generation or any destructive action
- * to save the current state. Call `undo()` to restore the last snapshot.
+ * Call `pushSnapshot(code)` before any destructive action to save current state.
+ * Call `undo()` to restore the previous snapshot (moves current to redo stack).
+ * Call `redo()` to re-apply the next snapshot.
  *
- * Returns `{ history, canUndo, pushSnapshot, undo }`.
+ * Returns `{ canUndo, canRedo, pushSnapshot, undo, redo }`.
  */
 export function useSvgHistory() {
-    const [history, setHistory] = useState([])
+  const [undoStack, setUndoStack] = useState([])
+  const [redoStack, setRedoStack] = useState([])
 
-    const pushSnapshot = useCallback((code) => {
-        setHistory((prev) => {
-            const next = [...prev, code]
-            return next.length > MAX_HISTORY ? next.slice(-MAX_HISTORY) : next
-        })
-    }, [])
+  const pushSnapshot = useCallback((code) => {
+    setUndoStack((prev) => {
+      const next = [...prev, code]
+      return next.length > MAX_HISTORY ? next.slice(-MAX_HISTORY) : next
+    })
+    // Any new action clears the redo stack
+    setRedoStack([])
+  }, [])
 
-    const undo = useCallback(() => {
-        let restored = null
+  const undo = useCallback((currentCode) => {
+    let restored = null
 
-        setHistory((prev) => {
-            if (prev.length === 0) return prev
-            restored = prev[prev.length - 1]
-            return prev.slice(0, -1)
-        })
+    setUndoStack((prev) => {
+      if (prev.length === 0) return prev
+      restored = prev[prev.length - 1]
+      return prev.slice(0, -1)
+    })
 
-        return restored
-    }, [])
-
-    return {
-        history,
-        canUndo: history.length > 0,
-        pushSnapshot,
-        undo,
+    if (currentCode !== undefined) {
+      setRedoStack((prev) => [...prev, currentCode])
     }
+
+    return restored
+  }, [])
+
+  const redo = useCallback((currentCode) => {
+    let restored = null
+
+    setRedoStack((prev) => {
+      if (prev.length === 0) return prev
+      restored = prev[prev.length - 1]
+      return prev.slice(0, -1)
+    })
+
+    if (currentCode !== undefined) {
+      setUndoStack((prev) => [...prev, currentCode])
+    }
+
+    return restored
+  }, [])
+
+  return {
+    canUndo: undoStack.length > 0,
+    canRedo: redoStack.length > 0,
+    pushSnapshot,
+    undo,
+    redo,
+  }
 }

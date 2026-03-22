@@ -275,6 +275,41 @@
   font: inherit;
 }
 
+.ai-prompt-wrapper {
+  position: relative;
+}
+
+.ai-prompt-wrapper .ai-prompt-input {
+  padding-bottom: 30px;
+}
+
+.ai-prompt-counter {
+  position: absolute;
+  bottom: 10px;
+  right: 14px;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-faint);
+  pointer-events: none;
+  transition: color 160ms ease;
+}
+
+.ai-prompt-counter-warn {
+  color: #d97706;
+}
+
+.ai-prompt-counter-over {
+  color: var(--color-error-text-body);
+  font-weight: 600;
+}
+
+.ai-shortcut-hint {
+  margin: -6px 0 0;
+  font-size: 0.72rem;
+  color: var(--color-text-faint);
+  text-align: center;
+}
+
 .ai-generate-button {
   width: 100%;
   border: 1px solid var(--color-primary-bg);
