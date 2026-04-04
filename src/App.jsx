@@ -10,6 +10,7 @@ import { downloadFile } from './utils/download'
 import { buildJsxComponent } from './utils/jsxConverter'
 import { sanitizeSvg } from './utils/sanitize'
 import { getSvgMeta } from './utils/svgMeta'
+import { buildShareUrl, clearShareParam, decodeSvgFromUrl, getRawShareParam } from './utils/shareUrl'
 import './App.css'
 
 const STORAGE_KEYS = {
@@ -25,10 +26,9 @@ const INITIAL_SVG = `<svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3
 </svg>`
 
 function App() {
-  const [svgCode, setSvgCode] = useState(() => {
-    const savedCode = localStorage.getItem(STORAGE_KEYS.svgCode)
-    return savedCode || INITIAL_SVG
-  })
+  const [svgCode, setSvgCode] = useState(
+    () => localStorage.getItem(STORAGE_KEYS.svgCode) || INITIAL_SVG
+  )
   const [editorMode, setEditorMode] = useState(() => {
     const savedMode = localStorage.getItem(STORAGE_KEYS.editorMode)
     return savedMode === 'ai' ? 'ai' : 'code'
@@ -38,6 +38,7 @@ function App() {
   const [aiPrompt, setAiPrompt] = useState('минималистичная контурная иконка камеры')
   const [formatError, setFormatError] = useState('')
   const [copied, setCopied] = useState(false)
+  const [shared, setShared] = useState(false)
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.theme)
     if (saved) return saved
@@ -62,6 +63,13 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem(STORAGE_KEYS.theme, theme)
   }, [theme])
+
+  useEffect(() => {
+    const raw = getRawShareParam()
+    if (!raw) return
+    clearShareParam()
+    decodeSvgFromUrl(raw).then(setSvgCode).catch(() => {})
+  }, [])
 
   const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
 
@@ -135,6 +143,22 @@ function App() {
       setTimeout(() => setCopied(false), 1500)
     }
   }
+
+  const handleShareUrl = useCallback(async () => {
+    const url = await buildShareUrl(svgCode)
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch {
+      const ta = document.createElement('textarea')
+      ta.value = url
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+    }
+    setShared(true)
+    setTimeout(() => setShared(false), 1500)
+  }, [svgCode])
 
   const handleDownloadSvg = () => {
     downloadFile('dreamsvg-icon.svg', svgCode, 'image/svg+xml;charset=utf-8')
@@ -301,6 +325,29 @@ function App() {
               <span className="panel-kicker">Предпросмотр</span>
               <h2>Живой рендер</h2>
             </div>
+            <div className="preview-header-actions">
+              <button
+                type="button"
+                className={`share-button${shared ? ' share-button-copied' : ''}`}
+                onClick={handleShareUrl}
+                disabled={!svgMeta.isValid}
+                title="Поделиться иконкой"
+                aria-label="Поделиться иконкой"
+              >
+                {shared ? (
+                  <svg className="button-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M4 10L8 14L16 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ) : (
+                  <svg className="button-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M14 3.5C14 4.88 15.12 6 16.5 6C17.88 6 19 4.88 19 3.5C19 2.12 17.88 1 16.5 1C15.12 1 14 2.12 14 3.5Z" stroke="currentColor" strokeWidth="1.6"/>
+                    <path d="M14 16.5C14 17.88 15.12 19 16.5 19C17.88 19 19 17.88 19 16.5C19 15.12 17.88 14 16.5 14C15.12 14 14 15.12 14 16.5Z" stroke="currentColor" strokeWidth="1.6"/>
+                    <path d="M1 10C1 11.38 2.12 12.5 3.5 12.5C4.88 12.5 6 11.38 6 10C6 8.62 4.88 7.5 3.5 7.5C2.12 7.5 1 8.62 1 10Z" stroke="currentColor" strokeWidth="1.6"/>
+                    <path d="M5.8 11.2L14.2 15.3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+                    <path d="M14.2 4.7L5.8 8.8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+                  </svg>
+                )}
+              </button>
             <button
               type="button"
               className="theme-toggle"
@@ -318,6 +365,7 @@ function App() {
               )}
               <span className="theme-toggle-track" />
             </button>
+            </div>
           </div>
 
           <div className="preview-stage">
