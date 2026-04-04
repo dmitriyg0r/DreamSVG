@@ -368,10 +368,11 @@ function App() {
             </div>
           </div>
 
-          <div className="preview-stage">
+          <div className={`preview-stage${aiBusy ? ' preview-stage--generating' : ''}`}>
+            {aiBusy && <div className="ai-scan-bar" aria-hidden="true" />}
             {svgMeta.isValid ? (
               <div
-                className="preview-canvas"
+                className={`preview-canvas${aiBusy ? ' preview-canvas--generating' : ''}`}
                 dangerouslySetInnerHTML={{ __html: safeSvg }}
               />
             ) : (

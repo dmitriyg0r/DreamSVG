@@ -57,7 +57,14 @@ function AiPanel({
         disabled={busy || !prompt.trim() || isOverLimit}
         title="Сгенерировать SVG (Ctrl+Enter)"
       >
-        {busy ? 'Генерирую…' : 'Сгенерировать SVG'}
+        {busy ? (
+          <span className="ai-generating-label">
+            Генерирую
+            <span className="ai-generating-dots" aria-hidden="true">
+              <span>.</span><span>.</span><span>.</span>
+            </span>
+          </span>
+        ) : 'Сгенерировать SVG'}
       </button>
 
       {!busy && (
