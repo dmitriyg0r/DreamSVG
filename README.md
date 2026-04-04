@@ -1,99 +1,116 @@
-# DreamSVG ✦
+<div align="center">
 
-**AI-powered SVG icon editor** — create, edit, and export SVG icons with a live preview and AI generation.
+<img src="public/dreamsvg-logo.svg" alt="DreamSVG" width="80" />
 
-🌐 **[dreamsvg.ru](https://dreamsvg.ru)**
+# DreamSVG
 
-<br>
+**AI-powered SVG icon editor with live preview**
 
-## ✨ Features
+Create, edit, and export SVG icons using natural language and code.
 
-- 🎨 **Live SVG Editor** — edit SVG code with syntax highlighting, line numbers, and auto-formatting (CodeMirror)
-- 🤖 **AI Generation** — describe an icon in plain text, and AI creates or refines your SVG
-- 👁 **Instant Preview** — see your icon update in real-time as you type
-- 🌗 **Dark / Light Theme** — toggle between themes with system preference detection
-- 📋 **Copy to Clipboard** — one-click copy of SVG code
-- ⬇️ **Download SVG / JSX** — export as a raw `.svg` file or as a ready-to-use React component
-- ↩️ **Undo History** — revert AI-generated changes with one click
-- 🔒 **XSS Protection** — SVG is sanitized via DOMPurify before rendering
+[![Live Demo](https://img.shields.io/badge/Live_Demo-dreamsvg.ru-0f172a?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMCAyQzUuNTggMiAyIDUuNTggMiAxMHMzLjU4IDggOCA4IDgtMy41OCA4LTgtMy41OC04LTgtOFptMSAxMy45M0E2LjAwNiA2LjAwNiAwIDAwMTUuOTMgMTFIMTN2LTJoMi45M0E2LjAwNiA2LjAwNiAwIDAwMTEgNC4wN1Y3SDlWNC4wN0E2LjAwNiA2LjAwNiAwIDAwNC4wNyA5SDdWMTFINC4wN0E2LjAwNiA2LjAwNiAwIDAwOSAxNS45M1YxM2gydjIuOTNaIi8+PC9zdmc+)](https://dreamsvg.ru)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+[![React](https://img.shields.io/badge/React-19-61dafb?style=for-the-badge&logo=react&logoColor=white)](https://react.dev)
 
-<br>
+</div>
 
-## 🚀 Getting Started
+---
+
+## Features
+
+| | Feature | Description |
+|---|---|---|
+| **Code** | Live SVG Editor | Syntax highlighting, line numbers, auto-formatting via CodeMirror |
+| **AI** | AI Generation | Describe an icon in plain text — AI creates or refines your SVG |
+| **Preview** | Instant Preview | Real-time rendering as you type with debounced updates |
+| **Theme** | Dark / Light | Toggle themes with system preference detection |
+| **Export** | SVG & JSX | Download as `.svg` or as a ready-to-use React component |
+| **History** | Undo / Redo | Revert or replay changes with up to 50 snapshots |
+| **Security** | XSS Protection | All SVG sanitized via DOMPurify before rendering |
+| **Mobile** | Responsive | Optimized layout for phones, tablets, and desktops |
+
+---
+
+## Quick Start
 
 ```bash
-# Clone the repository
 git clone https://github.com/dmitriyg0r/DreamSVG.git
 cd DreamSVG
-
-# Install dependencies
 npm install
-
-# Create .env from example
-cp .env.example .env
-# Edit .env and add your Polza AI API key
-
-# Start development server
-npm run dev
+cp .env.example .env   # add your Polza AI API key
+npm run dev             # → http://localhost:5173
 ```
 
-Open **http://localhost:5173** in your browser.
+---
 
-<br>
-
-## 🔧 Environment Variables
+## Environment Variables
 
 | Variable | Description | Default |
 |---|---|---|
-| `VITE_POLZA_AI_API_KEY` | API key for [Polza AI](https://polza.ai) | — |
-| `VITE_POLZA_AI_MODEL` | AI model to use | `openai/gpt-4o` |
+| `VITE_POLZA_AI_API_KEY` | API key for [Polza AI](https://polza.ai) | *required* |
+| `VITE_POLZA_AI_MODEL` | AI model | `openai/gpt-4o` |
 | `VITE_POLZA_API_BASE_URL` | API endpoint | `/api/polza` |
 
-<br>
+---
 
-## 📦 Tech Stack
+## Tech Stack
 
-- **[React 19](https://react.dev)** — UI framework
-- **[Vite](https://vite.dev)** — build tool with HMR
-- **[CodeMirror](https://codemirror.net)** — code editor with XML syntax highlighting
-- **[DOMPurify](https://github.com/cure53/DOMPurify)** — SVG sanitization
-- **[xml-formatter](https://github.com/chrisbottin/xml-formatter)** — SVG auto-formatting
+| Layer | Technology |
+|---|---|
+| Framework | [React 19](https://react.dev) |
+| Build | [Vite](https://vite.dev) |
+| Editor | [CodeMirror 6](https://codemirror.net) with XML highlighting |
+| Security | [DOMPurify](https://github.com/cure53/DOMPurify) |
+| Formatting | [xml-formatter](https://github.com/chrisbottin/xml-formatter) |
 
-<br>
+---
 
-## 🏗 Project Structure
+## Project Structure
 
 ```
 src/
-├── components/        # UI components
-│   ├── AiPanel.jsx       # AI prompt panel
-│   ├── AppLogo.jsx       # Logo icon
-│   └── SvgCodeEditor.jsx # CodeMirror editor
-├── hooks/             # Custom React hooks
-│   ├── useDebounce.js    # Value debouncing
-│   └── useSvgHistory.js  # Undo history
-├── services/          # API services
-│   └── svgAi.js          # Polza AI integration
-├── utils/             # Utility functions
-│   ├── download.js       # File download
-│   ├── jsxConverter.js   # SVG → JSX conversion
-│   ├── sanitize.js       # XSS sanitization
-│   └── svgMeta.js        # SVG parsing & validation
-├── App.jsx            # Main application
-├── App.css            # Component styles (CSS variables)
-└── index.css          # Design tokens & theme
+├── components/           # UI components
+│   ├── AiPanel.jsx          AI prompt input & generation
+│   ├── AppLogo.jsx          Logo component
+│   └── SvgCodeEditor.jsx   CodeMirror wrapper
+├── hooks/                # Custom React hooks
+│   ├── useDebounce.js       Value debouncing (300ms)
+│   └── useSvgHistory.js     Undo/redo (50 snapshots)
+├── services/             # External integrations
+│   └── svgAi.js             Polza AI API client
+├── utils/                # Pure functions
+│   ├── download.js          File download helper
+│   ├── jsxConverter.js      SVG → React JSX converter
+│   ├── sanitize.js          XSS sanitization
+│   └── svgMeta.js           SVG validation & metadata
+├── App.jsx               # Root component
+├── App.css               # Styles & responsive breakpoints
+└── index.css             # Design tokens & theme variables
 ```
 
-<br>
+---
 
-## 💖 Support
+## Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start dev server with HMR |
+| `npm run build` | Production build to `dist/` |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Run ESLint |
+
+---
+
+## Support
 
 If you find DreamSVG useful, consider supporting the project:
 
-[![Donation](https://img.shields.io/badge/Donate-DonationAlerts-orange?style=for-the-badge)](https://www.donationalerts.com/r/dmitriygor)
+<a href="https://www.donationalerts.com/r/dmitriygor">
+  <img src="https://img.shields.io/badge/Donate-DonationAlerts-F97316?style=for-the-badge" alt="Donate" />
+</a>
 
-<br>
+---
 
-## 📄 License
+## License
 
-MIT
+[MIT](LICENSE) — Dmitriy Gordienko
