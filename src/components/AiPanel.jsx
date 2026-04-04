@@ -32,7 +32,7 @@ function AiPanel({
       <div className="ai-panel-header">
         <div>
           <span className="editor-label">AI запрос</span>
-          <p className="ai-placeholder-title">Сгенерируй или доработай SVG с помощью AI</p>
+          <p className="ai-placeholder-title">Опиши иконку — AI создаст или доработает SVG</p>
         </div>
         <span className="ai-model-badge">{model}</span>
       </div>
@@ -43,7 +43,7 @@ function AiPanel({
           className="ai-prompt-input"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value.slice(0, MAX_PROMPT_LENGTH + 50))}
-          placeholder="Например: создай новую минималистичную иконку камеры или скругли углы у текущей иконки"
+          placeholder="Например: иконка камеры, ракета в стиле duotone, перекрась в синий, скругли углы"
         />
         <span className={`ai-prompt-counter${isOverLimit ? ' ai-prompt-counter-over' : remaining < 50 ? ' ai-prompt-counter-warn' : ''}`}>
           {remaining}
