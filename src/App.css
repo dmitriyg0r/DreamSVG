@@ -4,6 +4,12 @@
   overflow: hidden;
 }
 
+@supports (height: 100dvh) {
+  .app-shell {
+    height: 100dvh;
+  }
+}
+
 .workspace {
   display: grid;
   height: 100%;
@@ -186,6 +192,7 @@
 .format-button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   border: 1px solid var(--color-border-input);
   border-radius: 999px;
   padding: 7px;
@@ -196,6 +203,7 @@
 .undo-button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   border: 1px solid var(--color-border-input);
   border-radius: 999px;
@@ -547,29 +555,48 @@
 /* ---- Responsive ---- */
 
 @media (max-width: 1080px) {
+  .app-shell {
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  @supports (min-height: 100dvh) {
+    .app-shell {
+      min-height: 100dvh;
+    }
+  }
+
   .workspace {
     grid-template-columns: 1fr;
-    grid-template-rows: auto minmax(0, 1fr) minmax(0, 0.82fr);
+    grid-template-rows: auto auto auto;
+    height: auto;
   }
 
   .workspace-header {
-    grid-template-columns: 1fr;
-    align-items: flex-start;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+  }
+
+  .workspace-brand {
+    justify-self: start;
+  }
+
+  .workspace-links {
+    justify-self: end;
   }
 
   .workspace-meta {
-    justify-content: flex-start;
+    grid-column: 1 / -1;
+    justify-content: center;
   }
 
   .panel-editor,
   .panel-preview {
-    overflow: hidden;
-  }
-
-  .workspace-brand,
-  .workspace-links,
-  .workspace-meta {
-    justify-self: start;
+    overflow: visible;
+    min-height: 420px;
   }
 
   .preview-canvas {
@@ -586,13 +613,34 @@
     gap: 16px;
   }
 
+  .workspace-header {
+    gap: 10px;
+  }
+
+  .workspace-meta {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+  }
+
+  .workspace-meta span {
+    border: none;
+    background: none;
+    padding: 4px 0;
+  }
+
   .panel {
     padding: 16px;
     border-radius: 20px;
+    min-height: 360px;
   }
 
   .panel-header {
     flex-direction: column;
+    margin-bottom: 14px;
   }
 
   .editor-actions {
@@ -603,7 +651,138 @@
     order: -1;
   }
 
+  .mode-switch button {
+    padding: 9px 14px;
+    font-size: 0.85rem;
+  }
+
   .preview-stage {
     padding: 16px;
+  }
+
+  .ai-prompt-input {
+    min-height: 120px;
+  }
+
+  .ai-generate-button {
+    padding: 14px;
+    font-size: 1rem;
+  }
+
+  .export-button {
+    padding: 14px;
+    font-size: 0.95rem;
+  }
+
+  .workspace-github,
+  .undo-button,
+  .format-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .workspace-github {
+    width: 44px;
+    height: 44px;
+  }
+
+  .theme-toggle {
+    padding: 8px 12px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-shell {
+    padding: 12px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .workspace {
+    gap: 12px;
+  }
+
+  .workspace-header {
+    gap: 10px;
+  }
+
+  .workspace-brand h1 {
+    font-size: 0.9rem;
+  }
+
+  .app-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .workspace-links {
+    gap: 8px;
+  }
+
+  .workspace-donate span {
+    display: none;
+  }
+
+  .workspace-donate {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .workspace-meta {
+    gap: 6px;
+  }
+
+  .workspace-meta span {
+    padding: 5px 8px;
+    font-size: 0.65rem;
+  }
+
+  .panel {
+    padding: 14px;
+    border-radius: 18px;
+    min-height: 300px;
+  }
+
+  .panel-header h2 {
+    font-size: 1rem;
+  }
+
+  .editor-frame {
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .preview-canvas {
+    max-width: 220px;
+    padding: 16px;
+  }
+
+  .inspector {
+    gap: 8px;
+    padding: 12px;
+    margin-top: 12px;
+  }
+
+  .code-editor-shell .cm-scroller {
+    font-size: 0.82rem;
+  }
+
+  .ai-prompt-input {
+    min-height: 100px;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+  }
+
+  .ai-panel-header {
+    flex-direction: column;
+  }
+
+  .ai-placeholder-title {
+    font-size: 0.92rem;
   }
 }
