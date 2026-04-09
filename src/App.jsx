@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import formatXml from 'xml-formatter'
 import AiPanel from './components/AiPanel'
 import AppLogo from './components/AppLogo'
@@ -11,6 +11,7 @@ import { buildJsxComponent } from './utils/jsxConverter'
 import { sanitizeSvg } from './utils/sanitize'
 import { getSvgMeta } from './utils/svgMeta'
 import { buildShareUrl, clearShareParam, decodeSvgFromUrl, getRawShareParam } from './utils/shareUrl'
+import { findElementLine } from './utils/svgLineMapper'
 import './App.css'
 
 const STORAGE_KEYS = {
@@ -39,6 +40,8 @@ function App() {
   const [formatError, setFormatError] = useState('')
   const [copied, setCopied] = useState(false)
   const [shared, setShared] = useState(false)
+  const [highlightLine, setHighlightLine] = useState(null)
+  const hoverTimeoutRef = useRef(null)
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.theme)
     if (saved) return saved
@@ -72,6 +75,16 @@ function App() {
   }, [])
 
   const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
+
+  const handlePreviewMouseOver = useCallback((e) => {
+    clearTimeout(hoverTimeoutRef.current)
+    const line = findElementLine(e.target, svgCode)
+    setHighlightLine(line)
+  }, [svgCode])
+
+  const handlePreviewMouseLeave = useCallback(() => {
+    hoverTimeoutRef.current = setTimeout(() => setHighlightLine(null), 120)
+  }, [])
 
   const handleFormatSvg = () => {
     try {
@@ -306,6 +319,7 @@ function App() {
               onChange={setSvgCode}
               onFormat={handleFormatSvg}
               error={formatError}
+              highlightLine={highlightLine}
             />
           ) : (
             <AiPanel
@@ -374,6 +388,8 @@ function App() {
               <div
                 className={`preview-canvas${aiBusy ? ' preview-canvas--generating' : ''}`}
                 dangerouslySetInnerHTML={{ __html: safeSvg }}
+                onMouseOver={handlePreviewMouseOver}
+                onMouseLeave={handlePreviewMouseLeave}
               />
             ) : (
               <div className="preview-error">

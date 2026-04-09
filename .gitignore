@@ -13,6 +13,7 @@ dist-ssr
 .env
 deploy.sh
 *.local
+habr-article.md
 
 # Editor directories and files
 .vscode/*

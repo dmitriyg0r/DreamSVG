@@ -881,3 +881,19 @@
     font-size: 0.92rem;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/*  Preview ↔ Editor: hover highlight                                  */
+/* ------------------------------------------------------------------ */
+
+/* Line highlight in CodeMirror */
+.cm-preview-highlight {
+  background-color: rgba(249, 115, 22, 0.13) !important;
+  border-left: 2px solid #F97316 !important;
+  transition: background-color 0.1s ease;
+}
+
+/* Pointer cursor on hoverable SVG elements in the preview */
+.preview-canvas svg > * {
+  cursor: crosshair;
+}
