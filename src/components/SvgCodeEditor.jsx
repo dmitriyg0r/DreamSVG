@@ -75,7 +75,7 @@ const editorSetup = {
 /*  Component                                                           */
 /* ------------------------------------------------------------------ */
 
-function SvgCodeEditor({ value, onChange, onFormat, error, highlightLine }) {
+function SvgCodeEditor({ value, onChange, onFormat, error, highlightLine, cursorLine }) {
   const viewRef = useRef(null)
 
   // Dispatch highlight decoration whenever the prop changes
@@ -97,6 +97,22 @@ function SvgCodeEditor({ value, onChange, onFormat, error, highlightLine }) {
       }
     }
   }, [highlightLine])
+
+  // Move cursor to the clicked line and focus the editor
+  useEffect(() => {
+    const view = viewRef.current
+    if (!view || cursorLine == null) return
+    try {
+      const pos = view.state.doc.line(cursorLine).from
+      view.dispatch({
+        selection: { anchor: pos },
+        effects: EditorView.scrollIntoView(pos, { y: 'center' }),
+      })
+      view.focus()
+    } catch {
+      // line number out of range — ignore
+    }
+  }, [cursorLine])
 
   return (
     <div className="editor-frame">

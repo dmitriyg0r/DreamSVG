@@ -41,6 +41,7 @@ function App() {
   const [copied, setCopied] = useState(false)
   const [shared, setShared] = useState(false)
   const [highlightLine, setHighlightLine] = useState(null)
+  const [cursorLine, setCursorLine] = useState(null)
   const hoverTimeoutRef = useRef(null)
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.theme)
@@ -85,6 +86,14 @@ function App() {
   const handlePreviewMouseLeave = useCallback(() => {
     hoverTimeoutRef.current = setTimeout(() => setHighlightLine(null), 120)
   }, [])
+
+  const handlePreviewClick = useCallback((e) => {
+    const line = findElementLine(e.target, svgCode)
+    if (line) {
+      setCursorLine(line)
+      setEditorMode('code')
+    }
+  }, [svgCode])
 
   const handleFormatSvg = () => {
     try {
@@ -320,6 +329,7 @@ function App() {
               onFormat={handleFormatSvg}
               error={formatError}
               highlightLine={highlightLine}
+              cursorLine={cursorLine}
             />
           ) : (
             <AiPanel
@@ -390,6 +400,7 @@ function App() {
                 dangerouslySetInnerHTML={{ __html: safeSvg }}
                 onMouseOver={handlePreviewMouseOver}
                 onMouseLeave={handlePreviewMouseLeave}
+                onClick={handlePreviewClick}
               />
             ) : (
               <div className="preview-error">
